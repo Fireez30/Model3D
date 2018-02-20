@@ -282,117 +282,120 @@ vector<vector<CPoint>> traceSurfaceCylindrique(vector<CPoint> points, CVector v1
     return result;
 }
 
+vector<vector<CPoint>> drawCylindre(){
+    int hauteur = 20;
+    int rayon = 10;
+    int nbMeridiens = 10;
+
+    vector<CPoint> result;
+
+    for(double a = 0; a < 2*M_PI; a+=1/10){
+    int x = sin(a);
+    int y = cos(a);
+    int z = 0;
+
+    result.push_back(CPoint(x,y,z));
+
+}
+
+   for(double a = 0; a < 2*M_PI; a+=1/10){
+    int x = hauteur+sin(a);
+    int y = hauteur+cos(a);
+    int z = 0;
+
+    result.push_back(CPoint(x,y,z));
+}
+
+
+return result;
+
+}
+
+vector<CPoint> drawCone(int n){
+    int rayon = 15;
+    int hauteur = 20;
+
+    vector<CPoint> result;
+    result.push_back(CPoint(0,0,20));
+
+
+  for(double a = 0; a < 2*M_PI; a+=1/n){
+    int x = hauteur+result[0].getX()+sin(a);
+    int y = hauteur+result[0].getY()+cos(a);
+    int z = 0;
+
+    result.push_back(CPoint(x,y,z));
+}    
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Fonction que vous allez modifier afin de dessiner
 /////////////////////////////////////////////////////////////////////////////////////////
 void render_scene()
 {
 
-
+    /*    Exercice 1 
     glOrtho(-4.0,4.0,-4.0,4.0,-4.0,4.0);
-    CPoint p0,p1,p2,p3,p4;
+    
+    vector<vector<CPoint>> cercles;
+    cercles = drawCylindre();
 
-    double nbu = 20;
-
-    p0 = CPoint(0,0,0);
-    p1 = CPoint(1,1,0);
-    p2 = CPoint(2,1,0);
-    p3 = CPoint(3,0,0);
-    p4 = CPoint(4,3,0);
-
-    vector<CPoint> points;
-    points.push_back(p0);
-    points.push_back(p1);
-    points.push_back(p2);
-    points.push_back(p3);
-    points.push_back(p4);
-
-    for (int i = 0; i < points.size(); i++)
-        cout << points[i].getX() << "." << points[i].getY() << "." << points[i].getZ() << endl;
-
-    glColor3f(1.0,0.0,0.0);
-    DrawCurve(points);
-
-    glColor3f(1.0,1.0,1.0);
-    vector<CPoint> result;
-    result = BezierCurveByCasteljau(points,nbu);
-
-    DrawCurve(result);
-
-
-
-    //---------------------------------------------------------------------
-
-    /* tp3 exo 1
-
-    glOrtho(-3.5,3.5,-3.5,3.5,-3.5,3.5);
-    CPoint p0,p1,p2,p3,p4;
-
-    double nbu = 40;
-
-    p0 = CPoint(0,0,0);
-    p1 = CPoint(1,1,0);
-    p2 = CPoint(2,1,0);
-    p3 = CPoint(3,0,0);
-    p4 = CPoint(4,3,0);
-
-    vector<CPoint> points;
-    points.push_back(p0);
-    points.push_back(p1);
-    points.push_back(p2);
-    points.push_back(p3);
-    points.push_back(p4);
-
-    for (int i = 0; i < points.size(); i++)
-        cout << points[i].getX() << "." << points[i].getY() << "." << points[i].getZ() << endl;
-
-    glColor3f(1.0,1.0,1.0);
-
-    CVector v = CVector(2,-1,0);
-    v.drawLine(p0.getX(), p0.getY(), p0.getZ());
-
-    vector<vector<CPoint>> courbes;
-
-    courbes = traceSurfaceCylindrique(points,v,nbu,nbu);
-    for(int i = 0; i < courbes.size(); i++){
-        DrawCurve(courbes[i]);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < cercles.size() - 1; i++){
+        glVertex3f(cercles[0].get(i).getX(),cercles[0].get(i).getY(),cercles[0].get(i).getZ());
+        glVertex3f(cercles[0].get(i+1).getX(),cercles[0].get(i+1).getY(),cercles[0].get(i+1).getZ());
     }
-*/
+    glEnd();
+
+
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < cercles.size() - 1; i++){
+        glVertex3f(cercles[1].get(i).getX(),cercles[1].get(i).getY(),cercles[1].get(i).getZ());
+        glVertex3f(cercles[1].get(i+1).getX(),cercles[1].get(i+1).getY(),cercles[1].get(i+1).getZ());
+    }
+    glEnd();
+
+
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < cercles.size() - 1; i++){
+        glVertex3f(cercles[0].get(i).getX(),cercles[0].get(i).getY(),cercles[0].get(i).getZ());
+        glVertex3f(cercles[1].get(i).getX(),cercles[1].get(i).getY(),cercles[1].get(i).getZ());
+    }
+    glEnd();
+
+    */
+
     //---------------------------------------------------------------------
     //Définition de la couleur
+    
+    /* Exo 2 
+
     glColor3f(1.0, 1.0, 1.0);
+    glOrtho(-4.0,4.0,-4.0,4.0,-4.0,4.0);
 
-    //  Nous créons ici un polygone. Nous pourrions aussi créer un triangle ou des lignes. Voir ci-dessous les parties
-    // en commentaires (il faut commenter le bloc qui ne vous intéresse pas et décommenter celui que vous voulez tester.
+    int nbM = 10;
 
-    // Création de deux lignes
-    /*glColor3f(0,1.0,0);
-    glBegin(GL_LINES);
-        glVertex3f(-1, -1, 0);
-        glVertex3f(1, 1, 0);
-        glVertex3f(1, -1, 0);
-        glVertex3f(-1, 1, 0);
+    vector<CPoint> points;
+    points = drawCone(nbM);
+  
+    glBegin(GL_LINE_STRIP);
+    for (int i =0; i < points.size(); i++){
+        glVertex3f(points[0].getX(),points[0].getY(),points[0].getZ());
+        glVertex3f(points[i].getX(),points[i].getY(),points[i].getZ());
+    }
     glEnd();
-  */
-    // création d'un polygone
-    /*	glBegin(GL_POLYGON);
-        glVertex3f(-1, -1, 0);
-        glVertex3f(1, -1, 0);
-        glVertex3f(1, 1, 0);
-        glVertex3f(-1, 1, 0);
+
+    glBegin(GL_LINE_STRIP);
+    for (int i = 1; i < points.size() - 1; i++){
+        glVertex3f(points[i].getX(),points[i].getY(),points[i].getZ());
+        glVertex3f(points[i+1].getX(),points[i+1].getY(),points[i+1].getZ());
+    }
     glEnd();
-*/
+    
+    */  
 
-
-    /*
-// création d'un triangle
-    glBegin(GL_TRIANGLES);
-        glVertex3f(-1, -1, 0);
-        glVertex3f(1, -1, 0);
-        glVertex3f(1, 1, 0);
-    glEnd();
-*/
-
-
-
+    
+    glColor3f(1.0, 1.0, 1.0);
+    glOrtho(-4.0,4.0,-4.0,4.0,-4.0,4.0);
 }
