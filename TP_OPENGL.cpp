@@ -20,7 +20,7 @@ Vous pouvez ensuite y faire référence en spécifiant le chemin dans visual. Vous 
 Si vous mettez glut dans le répertoire courant, on aura alors #include "glut.h" 
 */
 
-#include "GL/glut.h" 
+#include "GL/freeglut.h"
 #include "CVector.h"
 #include "CPoint.h"
 
@@ -41,6 +41,8 @@ using namespace std;
 // Touche echap (Esc) permet de sortir du programme
 #define KEY_ESC 27
 #define PRECISION 0.1
+double nbM = 8;
+double nbN = 8;
 
 // Entêtes de fonctions
 void init_scene();
@@ -122,6 +124,7 @@ GLvoid window_reshape(GLsizei width, GLsizei height)
     // de trop grosse taille par rapport à la fenêtre.
     glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
 
+
     // toutes les transformations suivantes s´appliquent au modèle de vue
     glMatrixMode(GL_MODELVIEW);
 }
@@ -133,6 +136,18 @@ GLvoid window_key(unsigned char key, int x, int y)
     switch (key) {
     case KEY_ESC:
         exit(1);
+        break;
+
+    case '+':
+        nbM++;
+        nbN++;
+        glutPostRedisplay();
+        break;
+
+    case '-':
+        if (nbM > 4) nbM--;
+        if (nbN > 3) nbN--;
+        glutPostRedisplay();
         break;
 
     default:
@@ -251,8 +266,8 @@ vector<CPoint> BezierCurveByCasteljau(vector<CPoint> points,long nbu)
 
     return bezierPoints;
 }
-vector<vector<CPoint>> traceSurfaceCylindrique(vector<CPoint> points, CVector v1, long nbv,long nbu){
-    vector<vector<CPoint>> result;
+vector<vector<CPoint> > traceSurfaceCylindrique(vector<CPoint> points, CVector v1, long nbv,long nbu){
+    vector<vector<CPoint> > result;
     vector<CPoint> cptmp;
 
     vector<CPoint> bezier = BezierCurveByBernstein(points,nbu);
@@ -282,32 +297,72 @@ vector<vector<CPoint>> traceSurfaceCylindrique(vector<CPoint> points, CVector v1
     return result;
 }
 
-vector<vector<CPoint>> drawCylindre(){
-    int hauteur = 20;
-    int rayon = 10;
+double rand_float(double a, double b) {
+    return ((double)rand() / RAND_MAX) * (b - a) + a;
+}
+
+vector<vector<CPoint> > drawCylindre(){
+    double hauteur = 20.0;
+    double rayon = 10.0;
     int nbMeridiens = 10;
 
-    vector<CPoint> result;
+    vector<CPoint> tmp1;
+    vector<CPoint> tmp2;
+    vector<vector<CPoint> > result;
 
-    for(double a = 0; a < 2*M_PI; a+=1/10){
-    int x = sin(a);
-    int y = cos(a);
-    int z = 0;
+    for(double i = 0.0; i < nbMeridiens; i++){
+        double omega = 2.0 * M_PI *  i / nbMeridiens;
 
-    result.push_back(CPoint(x,y,z));
+        double x = rayon * sin(omega);
+        double y = rayon * cos(omega);
+        double z = 0.0;
+        double zb = hauteur;
 
-}
+        CPoint b = CPoint(x,y,z);
+        CPoint b2 = CPoint(x,y,zb);
 
-   for(double a = 0; a < 2*M_PI; a+=1/10){
-    int x = hauteur+sin(a);
-    int y = hauteur+cos(a);
-    int z = 0;
-
-    result.push_back(CPoint(x,y,z));
-}
+        tmp1.push_back(b);
+        tmp2.push_back(b2);
 
 
-return result;
+    }
+    result.push_back(tmp1);
+
+    result.push_back(tmp2);
+
+    for (int i = 0; i < result[0].size() - 1 ; i++){
+        glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+        glBegin(GL_POLYGON);
+        result[0][i].drawPoint();
+        result[1][i].drawPoint();
+        result[1][i+1].drawPoint();
+        result[0][i+1].drawPoint();
+        glEnd();
+
+    }
+
+    glBegin(GL_POLYGON);
+    result[0][0].drawPoint();
+    result[0][result[0].size() - 1].drawPoint();
+    result[1][result[0].size() - 1].drawPoint();
+    result[1][0].drawPoint();
+    glEnd();
+
+    glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < result[0].size(); i++){
+        result[0][i].drawPoint();
+    }
+
+    glEnd();
+    glBegin(GL_POLYGON);
+    result[0][0].drawPoint();
+    result[0][result.size()- 1].drawPoint();
+    result[0][result.size()- 2].drawPoint();
+    glEnd();
+
+
+    return result;
 
 }
 
@@ -318,16 +373,162 @@ vector<CPoint> drawCone(int n){
     vector<CPoint> result;
     result.push_back(CPoint(0,0,20));
 
+    for(double i = 0.0; i < n; i++){
+        double omega = 2.0 * M_PI *  i / n;
 
-  for(double a = 0; a < 2*M_PI; a+=1/n){
+        double x = rayon * sin(omega);
+        double y = rayon * cos(omega);
+        double z = 20+hauteur;
+
+        CPoint b = CPoint(x,y,z);
+
+        result.push_back(b);
+    }
+
+    for (int i = 0; i < result.size() - 1 ; i++){
+        glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+        glBegin(GL_POLYGON);
+        result[0].drawPoint();
+        result[i].drawPoint();
+        result[i+1].drawPoint();
+        glEnd();
+    }
+
+    glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+    glBegin(GL_POLYGON);
+    result[0].drawPoint();
+    result[1].drawPoint();
+    result[result.size() -1].drawPoint();
+    glEnd();
+
+
+    return result;
+}
+vector<vector<CPoint>> drawSphere(int rayon, double nbMeridiens, double nbParallelles){
+    vector<vector<CPoint>> result;
+
+    CPoint nord = CPoint(0,rayon,0);
+    CPoint sud = CPoint(0,- rayon,0);
+    glBegin(GL_POINTS);
+    glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+    glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+    sud.drawPoint();
+    glColor3f(1.0,1.0,1.0);
+    glEnd();
+    /* vector<CPoint> tmpnord;
+    tmpnord.push_back(nord);
+    result.push_back(tmpnord);*/
+
+
+    for (int i = 0; i < nbParallelles; i++){
+        double phi =  M_PI * i / nbParallelles;
+        vector<CPoint> tmp1;
+        for (int j = 0; j < nbMeridiens; j++){
+            double the = 2 * M_PI * j / nbMeridiens;
+            double x = rayon * sin(phi) * cos(the);
+            double z = rayon * sin(phi) * sin(the);
+            double y = rayon * cos(phi);
+            CPoint t = CPoint(x,y,z);
+            glBegin(GL_POINTS);
+            t.drawPoint();
+            glEnd();
+            tmp1.push_back(t);
+        }
+        result.push_back(tmp1);
+        tmp1.clear();
+    }
+    /*  vector<CPoint> tmpsud;
+    tmpsud.push_back(sud);
+    result.push_back(tmpsud);*/
+
+    for (int i = 0; i < result.size() -1 ; i++){
+        for (int j = 0;j < result[i].size() - 1 ; j++){
+            glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+            glBegin(GL_POLYGON);
+            result[i][j].drawPoint();
+            result[i+1][j].drawPoint();
+            result[i+1][j+1].drawPoint();
+            result[i][j+1].drawPoint();
+            glEnd();
+        }
+
+    glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+    glBegin(GL_POLYGON);
+    result[i][0].drawPoint();
+    result[i+1][0].drawPoint();
+    result[i+1][nbM - 1].drawPoint();
+    result[i][nbM - 1].drawPoint();
+    glEnd();
+    }
+
+    for (int i = 0; i < nbMeridiens ; i++){
+        glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+        glBegin(GL_POLYGON);
+        nord.drawPoint();
+        result[0][i].drawPoint();
+        result[0][i+1].drawPoint();
+        glEnd();
+    }
+
+    glBegin(GL_POLYGON);
+    nord.drawPoint();
+    result[0][0].drawPoint();
+    result[0][nbParallelles -1 ].drawPoint();
+    glEnd();
+
+    for (int i = 0; i < nbMeridiens ; i++){
+        glColor3f(rand_float(0.0,1.0), rand_float(0.0,1.0), rand_float(0.0,1.0));
+        glBegin(GL_POLYGON);
+        sud.drawPoint();
+        result[nbParallelles - 1][i].drawPoint();
+        result[nbParallelles - 1][i+1].drawPoint();
+        glEnd();
+    }
+    glBegin(GL_POLYGON);
+    sud.drawPoint();
+    result[nbParallelles -1 ][0].drawPoint();
+    result[nbParallelles -1 ][nbMeridiens - 1].drawPoint();
+    glEnd();
+
+    return result;
+}
+
+/*
+vector<vector<CPoint>> drawCercle(int nbP,int nbM){
+    int rayon = 10;
+    int hauteur = 20;
+
+    vector<vector<CPoint>> result;
+    for(double a = 0; a < 2*M_PI; a+=1/nbP){
     int x = hauteur+result[0].getX()+sin(a);
     int y = hauteur+result[0].getY()+cos(a);
     int z = 0;
 
-    result.push_back(CPoint(x,y,z));
-}    
+    result[0].push_back(CPoint(x,y,z));
+    }
 
+    for(double a = 0; a < 2*M_PI; a+=1/nbP){
+    int x = hauteur+result[0].getX()+sin(a);
+    int y = hauteur+result[0].getY()+cos(a);
+    int z = 0;
+
+    result[1].push_back(CPoint(x,y,z));
+
+    //
+    pas oulié les poles
+
+    phi = - 1 * M_PI /2
+    omega = -1 * M_PI
+
+    phi t = phi + 2 *M_PI * i / nbParallle
+    omega _ t  = + 2 *M_PI  * i / nbMeriidien
+
+    x = r * sin(phi t) * cos omega t
+    y = r * cos phi t
+    z = r * sin phi t * sin omega t
+}   
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Fonction que vous allez modifier afin de dessiner
@@ -335,41 +536,47 @@ vector<CPoint> drawCone(int n){
 void render_scene()
 {
 
-    /*    Exercice 1 
-    glOrtho(-4.0,4.0,-4.0,4.0,-4.0,4.0);
-    
-    vector<vector<CPoint>> cercles;
-    cercles = drawCylindre();
+    // Exercice 1
 
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < cercles.size() - 1; i++){
-        glVertex3f(cercles[0].get(i).getX(),cercles[0].get(i).getY(),cercles[0].get(i).getZ());
-        glVertex3f(cercles[0].get(i+1).getX(),cercles[0].get(i+1).getY(),cercles[0].get(i+1).getZ());
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glColor3f(1.0, 1.0, 1.0);
+    glOrtho(-51.0,51.0,-51.0,51.0,-51.0,51.0);
+    gluLookAt(15.0,20.0,15.0,0,10,0,0,1,0);
+    vector<vector<CPoint> > cylindre;
+    vector<CPoint> cone;
+    vector<vector<CPoint>> sphere;
+    //cylindre = drawCylindre();
+    //cone = drawCone(10);
+    sphere = drawSphere(20,nbM,nbN);
+    /* glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < cercles[0].size() - 2; i++){
+        glVertex3f(cercles[0][i].getX(),cercles[0][i].getY(),cercles[0][i].getZ());
+        glVertex3f(cercles[0][i+1].getX(),cercles[0][i+1].getY(),cercles[0][i+1].getZ());
     }
     glEnd();
 
 
     glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < cercles.size() - 1; i++){
-        glVertex3f(cercles[1].get(i).getX(),cercles[1].get(i).getY(),cercles[1].get(i).getZ());
-        glVertex3f(cercles[1].get(i+1).getX(),cercles[1].get(i+1).getY(),cercles[1].get(i+1).getZ());
+    for (int i = 0; i < cercles[0].size() - 2; i++){
+        glVertex3f(cercles[1][i].getX(),cercles[1][i].getY(),cercles[1][i].getZ());
+        glVertex3f(cercles[1][i+1].getX(),cercles[1][i+1].getY(),cercles[1][i+1].getZ());
     }
     glEnd();
 
 
     glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < cercles.size() - 1; i++){
-        glVertex3f(cercles[0].get(i).getX(),cercles[0].get(i).getY(),cercles[0].get(i).getZ());
-        glVertex3f(cercles[1].get(i).getX(),cercles[1].get(i).getY(),cercles[1].get(i).getZ());
+    for (int i = 0; i < cercles[0].size() - 2; i++){
+        glVertex3f(cercles[0][i].getX(),cercles[0][i].getY(),cercles[0][i].getZ());
+        glVertex3f(cercles[1][i].getX(),cercles[1][i].getY(),cercles[1][i].getZ());
     }
     glEnd();
 
-    */
-
+*/
     //---------------------------------------------------------------------
     //Définition de la couleur
     
-    /* Exo 2 
+    /* Exo 2
 
     glColor3f(1.0, 1.0, 1.0);
     glOrtho(-4.0,4.0,-4.0,4.0,-4.0,4.0);
@@ -378,7 +585,7 @@ void render_scene()
 
     vector<CPoint> points;
     points = drawCone(nbM);
-  
+
     glBegin(GL_LINE_STRIP);
     for (int i =0; i < points.size(); i++){
         glVertex3f(points[0].getX(),points[0].getY(),points[0].getZ());
@@ -393,9 +600,7 @@ void render_scene()
     }
     glEnd();
     
-    */  
+    */
 
-    
-    glColor3f(1.0, 1.0, 1.0);
-    glOrtho(-4.0,4.0,-4.0,4.0,-4.0,4.0);
+
 }
