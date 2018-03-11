@@ -1,0 +1,29 @@
+void displayVoxelRec(Voxel* v, Point* ct, double ray,double reso, double i) {
+  if(i<reso)
+  {
+    for(int k=0; k<8; k++)
+    {
+      Voxel* vtemp = new Voxel(&v->getSubCenterPoints()->at(k),(double)v->getLength()/2.0);
+      int test = vtemp->isInsideSphere(ct, ray);
+      //std::cout<<"test ="<<test<<std::endl;
+      if(test!=2)
+      {
+        if(test == 0)
+          vtemp->displayV();
+        else
+          displayVoxelRec(vtemp, ct,  ray, reso, i+1);
+      }
+      else // test == 2
+      {
+        if(i == reso-1)
+          vtemp->displayV();
+        else 
+          displayVoxelRec(vtemp, ct,  ray, reso, i+1);
+      }
+    }
+  }
+}
+void displaySphereAdaptatif(Point* ct, double ray, double reso) { // Point center, double rayon, double resolution
+    Voxel* v = new Voxel(ct,2*ray);
+    displayVoxelRec(v, ct, ray, reso, 0);
+}
